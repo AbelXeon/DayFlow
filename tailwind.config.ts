@@ -14,11 +14,11 @@ const config: Config = {
         accent: "var(--accent)",
         data: "var(--accent-data)",
       },
-      fontFamily: {
-        display: ["var(--font-space-grotesk)"],
-        body: ["var(--font-inter)"],
-        mono: ["var(--font-jetbrains)"],
-      },
+fontFamily: {
+  display: ["var(--font-bebas)"],
+  body: ["var(--font-inter)"],
+  mono: ["var(--font-jetbrains)"],
+},
     },
   },
   plugins: [],

@@ -23,9 +23,22 @@ body {
   overscroll-behavior-y: none;
 }
 
+/* Mobile Safari/Chrome give form controls system default colors
+   unless you force them — this is why your typed text was invisible. */
+input, select, textarea {
+  color: var(--text);
+  background-color: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
 }
+
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }

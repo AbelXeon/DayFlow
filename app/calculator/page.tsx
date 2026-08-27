@@ -1,114 +1,106 @@
 "use client";
 
 import { useState } from "react";
+import { evaluate, format } from "mathjs";
 
-const buttons = [
-  ["sin", "cos", "tan", "√"],
-  ["(", ")", "^", "÷"],
-  ["7", "8", "9", "×"],
-  ["4", "5", "6", "−"],
-  ["1", "2", "3", "+"],
-  ["0", ".", "%", "="],
+const sciStrip = [
+  "sin(", "cos(", "tan(", "log(", "ln(", "√(",
+  "^", "!", "mod", "(", ")", "π", "e",
+  "x", ",", "'", "[", "]", "det(", "inv(", "derivative(",
 ];
 
-const SAFE_PATTERN = /^[0-9+\-*/^().%\sA-Za-z]*$/;
+const pad = [
+  ["7", "8", "9", "÷"],
+  ["4", "5", "6", "×"],
+  ["1", "2", "3", "−"],
+  ["0", ".", "%", "+"],
+];
 
-function sanitizeAndEval(expr: string): string {
-  if (!SAFE_PATTERN.test(expr)) return "Error";
-  let js = expr
+function toMathExpr(raw: string) {
+  return raw
     .replace(/×/g, "*")
     .replace(/÷/g, "/")
     .replace(/−/g, "-")
-    .replace(/√/g, "Math.sqrt")
-    .replace(/sin/g, "Math.sin")
-    .replace(/cos/g, "Math.cos")
-    .replace(/tan/g, "Math.tan")
-    .replace(/\^/g, "**");
-
-  if (!/^[0-9+\-*/.()%\sA-Za-z]*$/.test(js)) return "Error";
-  // final guard: only allow Math.* identifiers, nothing else alphabetic
-  const stripped = js.replace(/Math\.[a-z]+/g, "");
-  if (/[A-Za-z]/.test(stripped)) return "Error";
-
-  try {
-    // eslint-disable-next-line no-new-func
-    const result = Function(`"use strict"; return (${js})`)();
-    if (typeof result !== "number" || !isFinite(result)) return "Error";
-    return String(Math.round(result * 1e10) / 1e10);
-  } catch {
-    return "Error";
-  }
+    .replace(/√\(/g, "sqrt(")
+    .replace(/π/g, "pi");
 }
 
 export default function CalculatorPage() {
   const [display, setDisplay] = useState("0");
-  const [expr, setExpr] = useState("");
 
-  function press(val: string) {
-    if (val === "=") {
-      const result = sanitizeAndEval(expr || display);
-      setDisplay(result);
-      setExpr(result === "Error" ? "" : result);
-      return;
+  function insert(val: string) {
+    setDisplay((d) => (d === "0" && !["(", "√(", "π", "e"].includes(val) ? val : d + val));
+  }
+
+  function calculate() {
+    try {
+      const result = evaluate(toMathExpr(display));
+      setDisplay(format(result, { precision: 12 }));
+    } catch {
+      setDisplay("Error");
     }
-    if (["sin", "cos", "tan", "√"].includes(val)) {
-      const next = (expr || (display !== "0" ? display : "")) + val + "(";
-      setExpr(next);
-      setDisplay(next);
-      return;
-    }
-    const next = (expr || (display === "0" ? "" : display)) + val;
-    setExpr(next);
-    setDisplay(next);
   }
 
   function clear() {
     setDisplay("0");
-    setExpr("");
   }
 
   function backspace() {
-    const next = (expr || display).slice(0, -1);
-    setExpr(next);
-    setDisplay(next || "0");
+    setDisplay((d) => (d.length <= 1 ? "0" : d.slice(0, -1)));
   }
 
   return (
-    <div className="px-5 pt-6 flex flex-col h-[calc(100vh-8rem)]">
-      <h1 className="font-display text-2xl font-semibold mb-4">Calculator</h1>
+    <div className="px-5 pt-6">
+      <h1 className="font-display text-3xl tracking-wide mb-4">Calculator</h1>
 
-      <div className="rounded-2xl border border-border bg-surface flex-1 flex flex-col justify-end p-5 mb-4">
-        <p className="font-mono text-data text-4xl text-right break-all">{display}</p>
+      <div className="rounded-2xl border border-border bg-surface p-5 mb-3 min-h-[6rem] flex items-end">
+        <p className="font-mono text-data text-3xl text-right break-all w-full">{display}</p>
       </div>
 
-      <div className="flex gap-2 mb-2">
-        <button
-          onClick={clear}
-          className="flex-1 rounded-xl bg-surface-elevated border border-border py-3 text-sm font-medium text-muted"
-        >
+      <div className="flex gap-2 mb-3">
+        <button onClick={clear} className="flex-1 rounded-xl bg-surface-elevated border border-border py-2.5 text-sm font-medium text-muted">
           Clear
         </button>
-        <button
-          onClick={backspace}
-          className="flex-1 rounded-xl bg-surface-elevated border border-border py-3 text-sm font-medium text-muted"
-        >
+        <button onClick={backspace} className="flex-1 rounded-xl bg-surface-elevated border border-border py-2.5 text-sm font-medium text-muted">
           Delete
         </button>
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
-        {buttons.flat().map((b) => (
+      {/* Scientific functions — scrolls sideways so it never pushes the pad off-screen */}
+      <div className="flex gap-2 overflow-x-auto pb-3 mb-1 -mx-5 px-5 no-scrollbar">
+        {sciStrip.map((b) => (
           <button
             key={b}
-            onClick={() => press(b)}
-            className={`rounded-xl py-4 font-mono text-lg border border-border active:scale-95 transition-transform ${
-              b === "=" ? "bg-accent text-bg font-semibold" : "bg-surface text-text"
-            }`}
+            onClick={() => insert(b)}
+            className="flex-shrink-0 rounded-lg bg-surface border border-border px-3 py-2 font-mono text-sm text-accent"
           >
             {b}
           </button>
         ))}
       </div>
+
+      <div className="grid grid-cols-4 gap-2">
+        {pad.flat().map((b) => (
+          <button
+            key={b}
+            onClick={() => insert(b)}
+            className="rounded-xl py-4 font-mono text-lg border border-border bg-surface text-text active:scale-95 transition-transform"
+          >
+            {b}
+          </button>
+        ))}
+      </div>
+
+      <button
+        onClick={calculate}
+        className="w-full rounded-xl bg-accent text-bg font-mono text-lg font-semibold py-4 mt-2 active:scale-95 transition-transform"
+      >
+        =
+      </button>
+
+      <p className="text-muted text-xs mt-3 text-center">
+        Try: derivative(&apos;x^2&apos;,&apos;x&apos;) · det([[1,2],[3,4]]) · 5!
+      </p>
     </div>
   );
 }
