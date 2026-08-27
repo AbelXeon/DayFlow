@@ -76,6 +76,7 @@ export default function TodoPage() {
   }
 
   const remaining = tasks.filter((t) => !t.done).length;
+  const completedCount = tasks.filter((t) => t.done).length;
 
   // Filter & Search Logic
   const filteredTasks = tasks.filter((task) => {
@@ -86,61 +87,86 @@ export default function TodoPage() {
   });
 
   return (
-    <div className="px-5 pt-6 pb-10 max-w-md mx-auto">
+    <div className="px-5 pt-6 pb-12 max-w-md mx-auto">
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="font-display text-3xl tracking-wide">Tasks</h1>
-          <p className="text-muted text-sm mt-0.5">
-            {remaining === 0 ? "All clear" : `${remaining} left today`}
-          </p>
+          <h1 className="font-display text-3xl font-bold tracking-wide text-text">Tasks</h1>
+          <div className="flex items-center gap-2 mt-1">
+            <span
+              className={`inline-block w-2 h-2 rounded-full ${
+                remaining === 0 ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" : "bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.6)]"
+              }`}
+            />
+            <p className="text-muted text-xs font-medium">
+              {remaining === 0 ? "All clear for today 🎉" : `${remaining} left to complete`}
+            </p>
+          </div>
         </div>
         <button
           onClick={openAdd}
-          className="rounded-xl bg-accent text-bg w-11 h-11 flex items-center justify-center flex-shrink-0"
+          className="rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white w-11 h-11 flex items-center justify-center flex-shrink-0 shadow-lg shadow-indigo-600/30 transition-all"
         >
           <Plus size={22} />
         </button>
       </div>
 
-      {/* Search Bar */}
-      <div className="relative mb-3">
+      {/* Search Bar with glowing focus and colored icon */}
+      <div className="relative mb-3.5">
         <Search
           size={16}
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400 pointer-events-none"
         />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search tasks..."
-          className="w-full bg-surface border border-border rounded-xl pl-9 pr-9 py-2.5 text-sm text-text placeholder:text-muted outline-none focus:border-accent transition-colors"
+          className="w-full bg-surface border border-border/80 rounded-2xl pl-10 pr-9 py-2.5 text-sm text-text placeholder:text-muted outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
         />
         {search && (
           <button
             onClick={() => setSearch("")}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-text"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-text p-0.5 rounded-full hover:bg-white/5 transition-colors"
           >
-            <X size={15} />
+            <X size={14} />
           </button>
         )}
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex gap-1 p-1 bg-surface border border-border rounded-xl mb-4 text-xs font-medium">
-        {(["all", "active", "completed"] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setFilter(tab)}
-            className={`flex-1 py-1.5 rounded-lg capitalize transition-all duration-150 ${
-              filter === tab
-                ? "bg-accent text-bg font-semibold shadow-sm"
-                : "text-muted hover:text-text"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
+      {/* Filter Tabs with Active Indicators & Badges */}
+      <div className="flex gap-1.5 p-1 bg-surface border border-border/80 rounded-2xl mb-4 text-xs font-medium">
+        {(
+          [
+            { id: "all", label: "All", count: tasks.length },
+            { id: "active", label: "Active", count: remaining },
+            { id: "completed", label: "Done", count: completedCount },
+          ] as const
+        ).map((tab) => {
+          const isActive = filter === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setFilter(tab.id as FilterType)}
+              className={`flex-1 py-2 px-2 rounded-xl flex items-center justify-center gap-1.5 transition-all duration-200 ${
+                isActive
+                  ? "bg-indigo-600 text-white font-semibold shadow-md shadow-indigo-600/25 scale-[1.02]"
+                  : "text-muted hover:text-text hover:bg-white/5"
+              }`}
+            >
+              <span>{tab.label}</span>
+              <span
+                className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                  isActive
+                    ? "bg-white/20 text-white"
+                    : "bg-border/60 text-muted"
+                }`}
+              >
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Tasks Grid */}
@@ -148,30 +174,48 @@ export default function TodoPage() {
         {filteredTasks.map((task) => (
           <div
             key={task.id}
-            className="rounded-xl bg-surface border border-border p-3 flex flex-col justify-between min-h-[92px]"
+            className={`rounded-2xl border p-3.5 flex flex-col justify-between min-h-[102px] transition-all duration-200 ${
+              task.done
+                ? "bg-surface/50 border-border/50 opacity-70"
+                : "bg-surface border-border hover:border-border/80 shadow-sm"
+            }`}
           >
             <p
               className={`text-sm leading-snug line-clamp-2 ${
-                task.done ? "line-through text-muted" : "text-text"
+                task.done ? "line-through text-muted/70" : "text-text font-medium"
               }`}
             >
               {task.text}
             </p>
-            <div className="flex items-center justify-between mt-2">
+
+            <div className="flex items-center justify-between mt-3 pt-2 border-t border-border/40">
+              {/* Green check button */}
               <button
                 onClick={() => toggle(task.id)}
-                className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${
-                  task.done ? "bg-green-500 border-green-500" : "border-border"
+                className={`w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
+                  task.done
+                    ? "bg-emerald-500 border-emerald-500 shadow-sm shadow-emerald-500/40"
+                    : "border-border hover:border-emerald-500/60"
                 }`}
               >
-                {task.done && <Check size={12} className="text-bg" />}
+                {task.done && <Check size={12} className="text-white stroke-[3]" />}
               </button>
-              <div className="flex items-center gap-2">
-                <button onClick={() => openEdit(task)} className="text-muted hover:text-text">
-                  <Pencil size={14} />
+
+              {/* Action Icons: Blue for Edit, Red for Delete */}
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => openEdit(task)}
+                  className="p-1 rounded-lg text-sky-400 hover:text-sky-300 hover:bg-sky-500/15 transition-colors"
+                  title="Edit task"
+                >
+                  <Pencil size={13} />
                 </button>
-                <button onClick={() => remove(task.id)} className="text-muted hover:text-text">
-                  <Trash2 size={14} />
+                <button
+                  onClick={() => remove(task.id)}
+                  className="p-1 rounded-lg text-rose-400 hover:text-rose-300 hover:bg-rose-500/15 transition-colors"
+                  title="Delete task"
+                >
+                  <Trash2 size={13} />
                 </button>
               </div>
             </div>
@@ -181,11 +225,15 @@ export default function TodoPage() {
 
       {/* Empty States */}
       {tasks.length === 0 && (
-        <p className="text-muted text-sm text-center py-16">Nothing here yet — tap + to add one.</p>
+        <div className="text-center py-16">
+          <p className="text-muted text-sm">Nothing here yet — tap + to add one.</p>
+        </div>
       )}
 
       {tasks.length > 0 && filteredTasks.length === 0 && (
-        <p className="text-muted text-sm text-center py-16">No tasks found matching your filter.</p>
+        <div className="text-center py-16">
+          <p className="text-muted text-sm">No tasks found in this view.</p>
+        </div>
       )}
 
       {/* Add / Edit Modal */}
@@ -196,13 +244,16 @@ export default function TodoPage() {
             className="fixed inset-0 z-[999] flex flex-col"
           >
             <div className="mx-auto w-full max-w-md flex flex-col flex-1 px-5 pt-6">
-              <div className="flex items-center justify-between pb-4">
-                <button onClick={closeEditor} className="text-muted">
+              <div className="flex items-center justify-between pb-4 border-b border-border/40">
+                <button
+                  onClick={closeEditor}
+                  className="text-muted hover:text-text p-1.5 rounded-xl hover:bg-white/5 transition-colors"
+                >
                   <X size={22} />
                 </button>
                 <button
                   onClick={saveTask}
-                  className="rounded-lg bg-accent text-bg px-4 py-2 text-sm font-medium flex items-center gap-1"
+                  className="rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 text-sm font-semibold flex items-center gap-1.5 shadow-lg shadow-indigo-600/30 transition-all active:scale-95"
                 >
                   <Check size={16} /> Done
                 </button>
@@ -211,8 +262,15 @@ export default function TodoPage() {
                 ref={textareaRef}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+                    e.preventDefault();
+                    saveTask();
+                  }
+                  if (e.key === "Escape") closeEditor();
+                }}
                 placeholder="What needs doing?"
-                className="flex-1 bg-transparent pb-6 text-lg outline-none resize-none placeholder:text-muted text-text"
+                className="flex-1 bg-transparent pt-4 pb-6 text-lg outline-none resize-none placeholder:text-muted text-text"
               />
             </div>
           </div>,
