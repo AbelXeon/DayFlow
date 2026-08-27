@@ -92,16 +92,7 @@ export default function TodoPage() {
       <div className="flex items-center justify-between mb-5">
         <div>
           <h1 className="font-display text-3xl font-bold tracking-wide text-text">Tasks</h1>
-          <div className="flex items-center gap-2 mt-1">
-            <span
-              className={`inline-block w-2 h-2 rounded-full ${
-                remaining === 0 ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" : "bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.6)]"
-              }`}
-            />
-            <p className="text-muted text-xs font-medium">
-              {remaining === 0 ? "All clear for today 🎉" : `${remaining} left to complete`}
-            </p>
-          </div>
+          
         </div>
         <button
           onClick={openAdd}
