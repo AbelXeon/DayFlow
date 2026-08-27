@@ -1,33 +1,44 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Plus, Trash2, Check } from "lucide-react";
+import { createPortal } from "react-dom";
+import { Plus, Trash2, Check, X } from "lucide-react";
 
 type Task = { id: string; text: string; done: boolean };
 
 export default function TodoPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [adding, setAdding] = useState(false);
-  const [input, setInput] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [draft, setDraft] = useState("");
+  const [mounted, setMounted] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     const saved = localStorage.getItem("dayflow-tasks");
     if (saved) setTasks(JSON.parse(saved));
+    setLoaded(true);
   }, []);
 
   useEffect(() => {
+    if (!loaded) return;
     localStorage.setItem("dayflow-tasks", JSON.stringify(tasks));
-  }, [tasks]);
+  }, [tasks, loaded]);
 
   useEffect(() => {
-    if (adding) inputRef.current?.focus();
+    if (adding) textareaRef.current?.focus();
   }, [adding]);
 
-  function confirmAdd() {
-    const text = input.trim();
+  function openAdd() {
+    setDraft("");
+    setAdding(true);
+  }
+
+  function saveTask() {
+    const text = draft.trim();
     if (text) setTasks((t) => [{ id: crypto.randomUUID(), text, done: false }, ...t]);
-    setInput("");
     setAdding(false);
   }
 
@@ -51,29 +62,12 @@ export default function TodoPage() {
           </p>
         </div>
         <button
-          onClick={() => setAdding(true)}
+          onClick={openAdd}
           className="rounded-xl bg-accent text-bg w-11 h-11 flex items-center justify-center flex-shrink-0"
         >
           <Plus size={22} />
         </button>
       </div>
-
-      {adding && (
-        <div className="flex gap-2 mb-4">
-          <input
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") confirmAdd();
-              if (e.key === "Escape") { setInput(""); setAdding(false); }
-            }}
-            onBlur={confirmAdd}
-            placeholder="What needs doing?"
-            className="flex-1 rounded-xl bg-surface border border-accent px-4 py-3 text-sm outline-none"
-          />
-        </div>
-      )}
 
       <div className="grid grid-cols-2 gap-3">
         {tasks.map((task) => (
@@ -105,9 +99,39 @@ export default function TodoPage() {
         ))}
       </div>
 
-      {tasks.length === 0 && !adding && (
+      {tasks.length === 0 && (
         <p className="text-muted text-sm text-center py-16">Nothing here yet — tap + to add one.</p>
       )}
+
+      {mounted && adding &&
+        createPortal(
+          <div
+            style={{ backgroundColor: "#0a0c0f" }}
+            className="fixed inset-0 z-[999] flex flex-col"
+          >
+            <div className="mx-auto w-full max-w-md flex flex-col flex-1 px-5 pt-6">
+              <div className="flex items-center justify-between pb-4">
+                <button onClick={() => setAdding(false)} className="text-muted">
+                  <X size={22} />
+                </button>
+                <button
+                  onClick={saveTask}
+                  className="rounded-lg bg-accent text-bg px-4 py-2 text-sm font-medium flex items-center gap-1"
+                >
+                  <Check size={16} /> Done
+                </button>
+              </div>
+              <textarea
+                ref={textareaRef}
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                placeholder="What needs doing?"
+                className="flex-1 bg-transparent pb-6 text-lg outline-none resize-none placeholder:text-muted text-text"
+              />
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
