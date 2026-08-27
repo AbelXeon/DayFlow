@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Plus, Trash2, Check, X } from "lucide-react";
+import { Plus, Trash2, Check, X, Pencil } from "lucide-react";
 
 type Task = { id: string; text: string; done: boolean };
 
@@ -10,6 +10,7 @@ export default function TodoPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [mounted, setMounted] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -28,18 +29,39 @@ export default function TodoPage() {
   }, [tasks, loaded]);
 
   useEffect(() => {
-    if (adding) textareaRef.current?.focus();
-  }, [adding]);
+    if (adding || editingId) textareaRef.current?.focus();
+  }, [adding, editingId]);
 
   function openAdd() {
     setDraft("");
+    setEditingId(null);
     setAdding(true);
+  }
+
+  function openEdit(task: Task) {
+    setDraft(task.text);
+    setEditingId(task.id);
+    setAdding(true);
+  }
+
+  function closeEditor() {
+    setAdding(false);
+    setEditingId(null);
+    setDraft("");
   }
 
   function saveTask() {
     const text = draft.trim();
-    if (text) setTasks((t) => [{ id: crypto.randomUUID(), text, done: false }, ...t]);
-    setAdding(false);
+    if (!text) {
+      closeEditor();
+      return;
+    }
+    if (editingId) {
+      setTasks((t) => t.map((task) => (task.id === editingId ? { ...task, text } : task)));
+    } else {
+      setTasks((t) => [{ id: crypto.randomUUID(), text, done: false }, ...t]);
+    }
+    closeEditor();
   }
 
   function toggle(id: string) {
@@ -91,9 +113,14 @@ export default function TodoPage() {
               >
                 {task.done && <Check size={12} className="text-bg" />}
               </button>
-              <button onClick={() => remove(task.id)} className="text-muted">
-                <Trash2 size={14} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => openEdit(task)} className="text-muted">
+                  <Pencil size={14} />
+                </button>
+                <button onClick={() => remove(task.id)} className="text-muted">
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -111,7 +138,7 @@ export default function TodoPage() {
           >
             <div className="mx-auto w-full max-w-md flex flex-col flex-1 px-5 pt-6">
               <div className="flex items-center justify-between pb-4">
-                <button onClick={() => setAdding(false)} className="text-muted">
+                <button onClick={closeEditor} className="text-muted">
                   <X size={22} />
                 </button>
                 <button
