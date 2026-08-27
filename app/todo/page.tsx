@@ -86,7 +86,7 @@ export default function TodoPage() {
               <button
                 onClick={() => toggle(task.id)}
                 className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                  task.done ? "bg-accent border-accent" : "border-border"
+                  task.done ? "bg-green-500 border-green-500" : "border-border"
                 }`}
               >
                 {task.done && <Check size={12} className="text-bg" />}
