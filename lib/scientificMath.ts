@@ -19,7 +19,7 @@ function primeFactors(n: number): string {
 }
 
 math.import(
-  { primeFactors: primeFactors as any },
+  { primeFactors },
   { override: true }
 );
 

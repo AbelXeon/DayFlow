@@ -30,7 +30,6 @@ export default function WeatherPage() {
   const [data, setData] = useState<WeatherData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
 const [globeOpen, setGlobeOpen] = useState(false);
 
@@ -59,13 +58,7 @@ const [globeOpen, setGlobeOpen] = useState(false);
     );
   }, []);
 
-  function submitSearch() {
-    if (search.trim()) {
-      fetchWeather(search.trim());
-      setSearch("");
-      setSearchOpen(false);
-    }
-  }
+  
 
   if (loading && !data) {
     return <div className="px-5 pt-6 text-muted text-sm">Loading weather…</div>;
