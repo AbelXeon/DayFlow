@@ -85,6 +85,26 @@ export default function CurrencyPage() {
 
   return (
     <div className="px-5 pt-6">
+      <style>{`
+        .custom-scroll::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.12);
+          border-radius: 9999px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.25);
+        }
+        .custom-scroll {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+        }
+      `}</style>
+
       <h1 className="font-display text-3xl tracking-wide mb-5">Exchange</h1>
 
       <div className="rounded-2xl border border-border bg-surface p-5">
@@ -137,7 +157,7 @@ export default function CurrencyPage() {
 
       <div className="rounded-2xl border border-border bg-surface p-4 mt-2">
         <p className="text-muted text-xs mb-3">1 {from} equals</p>
-        <div className="space-y-2 max-h-64 overflow-y-auto">
+        <div className="space-y-2 max-h-64 overflow-y-auto pr-1 custom-scroll">
           {allCurrencies
             .filter((c) => c !== from)
             .slice(0, 12)
@@ -155,20 +175,23 @@ export default function CurrencyPage() {
       {mounted && picker &&
         createPortal(
           <div
-            style={{ backgroundColor: "#0a0c0f" }}
-            className="fixed inset-0 z-[999] flex flex-col"
+            onClick={() => setPicker(null)}
+            className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           >
-            <div className="mx-auto w-full max-w-md flex flex-col flex-1 px-5 pt-6 min-h-0">
-              <div className="flex items-center justify-between pb-4">
-                <h2 className="font-display text-2xl tracking-wide">
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-2xl border border-border bg-surface p-4 shadow-2xl flex flex-col max-h-[75vh]"
+            >
+              <div className="flex items-center justify-between pb-3">
+                <h2 className="font-display text-lg tracking-wide">
                   Select {picker === "from" ? "from" : "to"} currency
                 </h2>
-                <button onClick={() => setPicker(null)} className="text-muted">
-                  <X size={22} />
+                <button onClick={() => setPicker(null)} className="text-muted hover:text-text transition-colors">
+                  <X size={20} />
                 </button>
               </div>
 
-              <div className="flex items-center gap-2 rounded-xl bg-surface border border-border px-3 py-3 mb-4">
+              <div className="flex items-center gap-2 rounded-xl bg-surface-elevated border border-border px-3 py-2.5 mb-3">
                 <Search size={16} className="text-muted flex-shrink-0" />
                 <input
                   autoFocus
@@ -179,12 +202,12 @@ export default function CurrencyPage() {
                 />
               </div>
 
-              <div className="flex-1 overflow-y-auto space-y-1 pb-6">
+              <div className="flex-1 overflow-y-auto space-y-1 pr-1 custom-scroll min-h-0">
                 {filteredCurrencies.map((c) => (
                   <button
                     key={c}
                     onClick={() => selectCurrency(c)}
-                    className="w-full text-left rounded-xl px-4 py-3 text-sm hover:bg-surface active:bg-surface-elevated flex items-center justify-between"
+                    className="w-full text-left rounded-xl px-3 py-2.5 text-sm hover:bg-surface-elevated transition-colors flex items-center justify-between"
                   >
                     <span>{c}</span>
                     {live && (
@@ -195,7 +218,7 @@ export default function CurrencyPage() {
                   </button>
                 ))}
                 {filteredCurrencies.length === 0 && (
-                  <p className="text-muted text-sm text-center py-10">No match</p>
+                  <p className="text-muted text-sm text-center py-8">No match</p>
                 )}
               </div>
             </div>
