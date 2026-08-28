@@ -12,6 +12,19 @@ const mockRates: Record<string, number> = {
   JPY: 149.2,
 };
 
+const currencyDisplayNames =
+  typeof Intl !== "undefined" && Intl.DisplayNames
+    ? new Intl.DisplayNames(["en"], { type: "currency" })
+    : null;
+
+function getCurrencyName(code: string) {
+  try {
+    return currencyDisplayNames?.of(code) || code;
+  } catch {
+    return code;
+  }
+}
+
 export default function CurrencyPage() {
   const [from, setFrom] = useState("USD");
   const [to, setTo] = useState("ETB");
@@ -59,8 +72,12 @@ export default function CurrencyPage() {
 
   const filteredCurrencies = useMemo(() => {
     if (!search.trim()) return allCurrencies;
-    const q = search.trim().toUpperCase();
-    return allCurrencies.filter((c) => c.includes(q));
+    const q = search.trim().toLowerCase();
+    return allCurrencies.filter((c) => {
+      const codeMatch = c.toLowerCase().includes(q);
+      const nameMatch = getCurrencyName(c).toLowerCase().includes(q);
+      return codeMatch || nameMatch;
+    });
   }, [allCurrencies, search]);
 
   const rate = (code: string) => (live ? rates[code] : mockRates[code] / mockRates[from]);
@@ -197,7 +214,7 @@ export default function CurrencyPage() {
                   autoFocus
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search currency code"
+                  placeholder="Search currency or country"
                   className="flex-1 bg-transparent text-sm outline-none text-text placeholder:text-muted"
                 />
               </div>
@@ -207,11 +224,14 @@ export default function CurrencyPage() {
                   <button
                     key={c}
                     onClick={() => selectCurrency(c)}
-                    className="w-full text-left rounded-xl px-3 py-2.5 text-sm hover:bg-surface-elevated transition-colors flex items-center justify-between"
+                    className="w-full text-left rounded-xl px-3 py-2.5 text-sm hover:bg-surface-elevated transition-colors flex items-center justify-between gap-3"
                   >
-                    <span>{c}</span>
+                    <div className="flex flex-col min-w-0">
+                      <span className="font-medium text-text">{c}</span>
+                      <span className="text-xs text-muted truncate">{getCurrencyName(c)}</span>
+                    </div>
                     {live && (
-                      <span className="font-mono text-muted text-xs">
+                      <span className="font-mono text-muted text-xs flex-shrink-0">
                         {rates[c]?.toLocaleString(undefined, { maximumFractionDigits: 4 })}
                       </span>
                     )}
