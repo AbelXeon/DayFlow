@@ -1,10 +1,9 @@
 import * as THREE from "three";
 import { landRings } from "./landRings";
+import { borderLines } from "./Borderlines";
 
-// Wireframe globe using real coastline data (Natural Earth, public domain, 110m resolution).
-// Equirectangular projection: lon -180..180 maps to x 0..w, lat 90..-90 maps to y 0..h.
 export function generateGlobeTexture(): THREE.CanvasTexture {
-  const w = 1024, h = 512;
+  const w = 2048, h = 1024; // doubled resolution — sharper coastlines when zoomed in
   const canvas = document.createElement("canvas");
   canvas.width = w;
   canvas.height = h;
@@ -12,8 +11,7 @@ export function generateGlobeTexture(): THREE.CanvasTexture {
 
   ctx.clearRect(0, 0, w, h);
 
-  // Lat/lon grid
-  ctx.strokeStyle = "rgba(255,255,255,0.25)";
+  ctx.strokeStyle = "rgba(255,255,255,0.2)";
   ctx.lineWidth = 1;
   for (let x = 0; x <= w; x += w / 18) {
     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
@@ -28,10 +26,10 @@ export function generateGlobeTexture(): THREE.CanvasTexture {
     return [x, y];
   }
 
+  // Coastlines
   ctx.strokeStyle = "#f2f1ed";
-  ctx.lineWidth = 1.4;
+  ctx.lineWidth = 1.6;
   ctx.lineJoin = "round";
-
   for (const ring of landRings) {
     ctx.beginPath();
     ring.forEach(([lon, lat], i) => {
@@ -40,6 +38,19 @@ export function generateGlobeTexture(): THREE.CanvasTexture {
       else ctx.lineTo(x, y);
     });
     ctx.closePath();
+    ctx.stroke();
+  }
+
+  // Country borders — thinner, dimmer, drawn on top of coastlines
+  ctx.strokeStyle = "rgba(242,169,59,0.55)"; // accent color, subdued
+  ctx.lineWidth = 1;
+  for (const line of borderLines) {
+    ctx.beginPath();
+    line.forEach(([lon, lat], i) => {
+      const [x, y] = project(lon, lat);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
     ctx.stroke();
   }
 
