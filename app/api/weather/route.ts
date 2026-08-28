@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q"); // city name OR "lat,lon"
-  const key = process.env.NEXT_WEATHER_API_KEY;
+  const key = process.env.WEATHER_API_KEY;
 
   if (!key) return NextResponse.json({ error: "Missing API key" }, { status: 500 });
   if (!q) return NextResponse.json({ error: "Missing location" }, { status: 400 });

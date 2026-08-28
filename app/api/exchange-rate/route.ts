@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const base = req.nextUrl.searchParams.get("base") || "USD";
-  const key = process.env.NEXT_EXCHANGE_RATE_API_KEY;
+  const key = process.env.EXCHANGE_RATE_API_KEY;
 
   if (!key) {
     return NextResponse.json({ error: "Missing API key" }, { status: 500 });
