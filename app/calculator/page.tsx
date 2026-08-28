@@ -98,9 +98,6 @@ export default function CalculatorPage() {
         =
       </button>
 
-      <p className="text-muted text-xs mt-3 text-center">
-        Try: derivative(&apos;x^2&apos;,&apos;x&apos;) · det([[1,2],[3,4]]) · 5!
-      </p>
     </div>
   );
 }
