@@ -36,7 +36,7 @@ export default function Globe3D({ onSelectCity }: { onSelectCity: (city: GlobeCi
     // Globe — unlit flat material, no lighting cost at all
     const geometry = new THREE.SphereGeometry(1, 48, 32);
     const texture = generateGlobeTexture();
-    const material = new THREE.MeshBasicMaterial({ map: texture });
+    const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true });
     const globe = new THREE.Mesh(geometry, material);
     group.add(globe);
 
