@@ -3,7 +3,7 @@ import { landRings } from "./landRings";
 import { borderLines } from "./borderLines";
 
 export function generateGlobeTexture(): THREE.CanvasTexture {
-  const w = 2048, h = 1024; // doubled resolution — sharper coastlines when zoomed in
+  const w = 2048, h = 1024; 
   const canvas = document.createElement("canvas");
   canvas.width = w;
   canvas.height = h;
