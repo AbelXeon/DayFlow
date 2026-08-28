@@ -85,7 +85,7 @@ export default function CalculatorPage() {
       {mode === "standard" && <StandardView />}
       {mode === "scientific" && <ScientificView />}
       {mode === "programmer" && <ProgrammerView />}
-      {unitModes.has(mode) && <UnitConverterView mode={mode} />}
+      {unitModes.has(mode) && <UnitConverterView key={mode} mode={mode} />}
 
       <CalcMenuSheet open={menuOpen} onClose={() => setMenuOpen(false)} selected={mode} onSelect={setMode} />
     </div>
