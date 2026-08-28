@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ArrowLeftRight } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import { ArrowLeftRight, ChevronDown, Search, X } from "lucide-react";
 
 const mockRates: Record<string, number> = {
   USD: 1,
@@ -11,9 +12,6 @@ const mockRates: Record<string, number> = {
   JPY: 149.2,
 };
 
-const currencies = Object.keys(mockRates);
-const popularAgainst = ["USD", "EUR", "GBP", "ETB", "JPY"];
-
 export default function CurrencyPage() {
   const [from, setFrom] = useState("USD");
   const [to, setTo] = useState("ETB");
@@ -22,6 +20,12 @@ export default function CurrencyPage() {
   const [updated, setUpdated] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [live, setLive] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  const [picker, setPicker] = useState<"from" | "to" | null>(null);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -32,8 +36,6 @@ export default function CurrencyPage() {
       .then((data) => {
         if (cancelled) return;
         if (data.rates) {
-          // rates are relative to `from`, so USD-based mockRates format won't mix in —
-          // rebuild against USD=1 style isn't needed, we just use them directly since base = from
           setRates({ ...data.rates, [from]: 1 });
           setUpdated(data.updated);
           setLive(true);
@@ -49,8 +51,18 @@ export default function CurrencyPage() {
     };
   }, [from]);
 
-  // when live, rates[x] = units of x per 1 `from`. when mock, mockRates is USD-based, so
-  // convert via the from-anchor either way using the same math.
+  // Full currency list — from live data when we have it (~160 codes), mock list otherwise
+  const allCurrencies = useMemo(() => {
+    const codes = live ? Object.keys(rates) : Object.keys(mockRates);
+    return codes.sort();
+  }, [rates, live]);
+
+  const filteredCurrencies = useMemo(() => {
+    if (!search.trim()) return allCurrencies;
+    const q = search.trim().toUpperCase();
+    return allCurrencies.filter((c) => c.includes(q));
+  }, [allCurrencies, search]);
+
   const rate = (code: string) => (live ? rates[code] : mockRates[code] / mockRates[from]);
   const numeric = parseFloat(amount) || 0;
   const converted = numeric * rate(to);
@@ -58,6 +70,17 @@ export default function CurrencyPage() {
   function swap() {
     setFrom(to);
     setTo(from);
+  }
+
+  function openPicker(which: "from" | "to") {
+    setSearch("");
+    setPicker(which);
+  }
+
+  function selectCurrency(code: string) {
+    if (picker === "from") setFrom(code);
+    if (picker === "to") setTo(code);
+    setPicker(null);
   }
 
   return (
@@ -74,15 +97,12 @@ export default function CurrencyPage() {
         />
 
         <div className="flex items-center gap-2">
-          <select
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-            className="flex-1 rounded-xl bg-surface-elevated border border-border px-3 py-3 text-sm"
+          <button
+            onClick={() => openPicker("from")}
+            className="flex-1 rounded-xl bg-surface-elevated border border-border px-3 py-3 text-sm flex items-center justify-between"
           >
-            {currencies.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
+            {from} <ChevronDown size={16} className="text-muted" />
+          </button>
 
           <button
             onClick={swap}
@@ -91,15 +111,12 @@ export default function CurrencyPage() {
             <ArrowLeftRight size={18} />
           </button>
 
-          <select
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-            className="flex-1 rounded-xl bg-surface-elevated border border-border px-3 py-3 text-sm"
+          <button
+            onClick={() => openPicker("to")}
+            className="flex-1 rounded-xl bg-surface-elevated border border-border px-3 py-3 text-sm flex items-center justify-between"
           >
-            {currencies.map((c) => (
-              <option key={c}>{c}</option>
-            ))}
-          </select>
+            {to} <ChevronDown size={16} className="text-muted" />
+          </button>
         </div>
       </div>
 
@@ -120,9 +137,10 @@ export default function CurrencyPage() {
 
       <div className="rounded-2xl border border-border bg-surface p-4 mt-2">
         <p className="text-muted text-xs mb-3">1 {from} equals</p>
-        <div className="space-y-2">
-          {popularAgainst
+        <div className="space-y-2 max-h-64 overflow-y-auto">
+          {allCurrencies
             .filter((c) => c !== from)
+            .slice(0, 12)
             .map((c) => (
               <div key={c} className="flex items-center justify-between">
                 <span className="text-sm text-text">{c}</span>
@@ -133,6 +151,57 @@ export default function CurrencyPage() {
             ))}
         </div>
       </div>
+
+      {mounted && picker &&
+        createPortal(
+          <div
+            style={{ backgroundColor: "#0a0c0f" }}
+            className="fixed inset-0 z-[999] flex flex-col"
+          >
+            <div className="mx-auto w-full max-w-md flex flex-col flex-1 px-5 pt-6 min-h-0">
+              <div className="flex items-center justify-between pb-4">
+                <h2 className="font-display text-2xl tracking-wide">
+                  Select {picker === "from" ? "from" : "to"} currency
+                </h2>
+                <button onClick={() => setPicker(null)} className="text-muted">
+                  <X size={22} />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2 rounded-xl bg-surface border border-border px-3 py-3 mb-4">
+                <Search size={16} className="text-muted flex-shrink-0" />
+                <input
+                  autoFocus
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search currency code"
+                  className="flex-1 bg-transparent text-sm outline-none text-text placeholder:text-muted"
+                />
+              </div>
+
+              <div className="flex-1 overflow-y-auto space-y-1 pb-6">
+                {filteredCurrencies.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => selectCurrency(c)}
+                    className="w-full text-left rounded-xl px-4 py-3 text-sm hover:bg-surface active:bg-surface-elevated flex items-center justify-between"
+                  >
+                    <span>{c}</span>
+                    {live && (
+                      <span className="font-mono text-muted text-xs">
+                        {rates[c]?.toLocaleString(undefined, { maximumFractionDigits: 4 })}
+                      </span>
+                    )}
+                  </button>
+                ))}
+                {filteredCurrencies.length === 0 && (
+                  <p className="text-muted text-sm text-center py-10">No match</p>
+                )}
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
