@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Menu } from "lucide-react";
 import CalcMenuSheet, { CalcMode } from "@/components/calculator/CalcMenuSheet";
 import UnitConverterView from "@/components/calculator/UnitConverterView";
@@ -20,9 +20,26 @@ const padBasic = [
 
 function StandardView() {
   const [display, setDisplay] = useState("0");
+
+  const liveResult = useMemo(() => {
+    try {
+      const expr = display.replace(/×/g, "*").replace(/÷/g, "/").replace(/−/g, "-");
+      if (!/^[0-9+\-*/. %()]+$/.test(expr)) return null;
+      // eslint-disable-next-line no-new-func
+      const res = Function(`"use strict"; return (${expr})`)();
+      if (typeof res === "number" && isFinite(res) && String(res) !== display) {
+        return String(res);
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }, [display]);
+
   function insert(val: string) {
     setDisplay((d) => (d === "0" ? val : d + val));
   }
+
   function calculate() {
     try {
       const expr = display.replace(/×/g, "*").replace(/÷/g, "/").replace(/−/g, "-");
@@ -33,12 +50,18 @@ function StandardView() {
       setDisplay("Error");
     }
   }
+
   function clear() { setDisplay("0"); }
   function backspace() { setDisplay((d) => (d.length <= 1 ? "0" : d.slice(0, -1))); }
 
   return (
     <div className="px-5 pt-6">
-      <div className="rounded-2xl border border-border bg-surface p-5 mb-3 min-h-[6rem] flex items-end">
+      <div className="rounded-2xl border border-border bg-surface p-5 mb-3 min-h-[6rem] flex flex-col justify-end">
+        {liveResult !== null && (
+          <p className="font-mono text-muted text-sm text-right break-all w-full mb-1">
+            = {liveResult}
+          </p>
+        )}
         <p className="font-mono text-data text-3xl text-right break-all w-full">{display}</p>
       </div>
       <div className="flex gap-2 mb-3">

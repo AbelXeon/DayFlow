@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { math, simpsonIntegrate, numericLimit } from "@/lib/scientificMath";
 
 const categories = {
@@ -28,6 +28,20 @@ export default function ScientificView() {
   const [cat, setCat] = useState<Cat>("Basic");
   const [showCalculus, setShowCalculus] = useState(false);
   const [bound, setBound] = useState({ a: "0", b: "1" });
+
+  const liveResult = useMemo(() => {
+    try {
+      const expr = toMathExpr(display);
+      const res = math.evaluate(expr);
+      const formatted = math.format(res, { precision: 10 });
+      if (formatted && formatted !== display && typeof res !== "function") {
+        return String(formatted);
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }, [display]);
 
   function insert(val: string) {
     setDisplay((d) => (d === "0" && !["(", "√(", "π", "e"].includes(val) ? val : d + val));
@@ -70,7 +84,12 @@ export default function ScientificView() {
 
   return (
     <div className="px-5 pt-6">
-      <div className="rounded-2xl border border-border bg-surface p-4 mb-2 min-h-[5rem] flex items-end">
+      <div className="rounded-2xl border border-border bg-surface p-4 mb-2 min-h-[5rem] flex flex-col justify-end">
+        {liveResult !== null && (
+          <p className="font-mono text-muted text-xs text-right break-all w-full mb-0.5">
+            = {liveResult}
+          </p>
+        )}
         <p className="font-mono text-data text-2xl text-right break-all w-full">{display}</p>
       </div>
 
