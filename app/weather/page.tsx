@@ -47,9 +47,7 @@ export default function WeatherPage() {
         ))}
       </div>
 
-      <p className="text-muted text-xs mt-4 text-center">
-        Mock data — plug in your weather API in app/weather/page.tsx
-      </p>
+      
     </div>
   );
 }
