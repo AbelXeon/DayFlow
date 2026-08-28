@@ -75,9 +75,7 @@ export default function CurrencyPage() {
         <p className="text-muted text-sm mt-1">{to}</p>
       </div>
 
-      <p className="text-muted text-xs mt-4 text-center">
-        Mock rates — plug in your exchange rate API in app/currency/page.tsx
-      </p>
+     
     </div>
   );
 }
