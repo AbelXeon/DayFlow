@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import { CloudSun, Droplets, Wind, Search, AlertTriangle, Sunrise, Sunset } from "lucide-react";
 
+import GlobeSheet from "@/components/globe/GlobeSheet";
+import { GlobeCity } from "@/lib/globeCities";
+
+
 type WeatherData = {
   location: { name: string; region: string };
   current: { temp_c: number; condition: { text: string }; humidity: number; wind_kph: number };
@@ -28,6 +32,8 @@ export default function WeatherPage() {
   const [loading, setLoading] = useState(true);
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
+const [globeOpen, setGlobeOpen] = useState(false);
+
 
   function fetchWeather(query: string) {
     setLoading(true);
@@ -86,28 +92,14 @@ export default function WeatherPage() {
       <div className="flex items-center justify-between mb-5">
         <h1 className="font-display text-3xl tracking-wide">Weather</h1>
         <button
-          onClick={() => setSearchOpen((s) => !s)}
+           onClick={() => setGlobeOpen(true)}
           className="rounded-xl border border-border bg-surface p-2.5"
         >
           <Search size={18} className="text-text" />
         </button>
       </div>
 
-      {searchOpen && (
-        <div className="flex gap-2 mb-4">
-          <input
-            autoFocus
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && submitSearch()}
-            placeholder="Search a city"
-            className="flex-1 rounded-xl bg-surface border border-border px-4 py-2.5 text-sm outline-none text-text"
-          />
-          <button onClick={submitSearch} className="rounded-xl bg-accent text-bg px-4 text-sm font-medium">
-            Go
-          </button>
-        </div>
-      )}
+      
 
       <div className="rounded-2xl border border-border bg-surface p-6 mb-4">
         <p className="text-muted text-sm">{data.location.name}, {data.location.region}</p>
@@ -161,6 +153,14 @@ export default function WeatherPage() {
       ) : (
         <p className="text-muted text-xs text-center py-4">No active weather alerts for this location.</p>
       )}
+
+<GlobeSheet
+  open={globeOpen}
+  onClose={() => setGlobeOpen(false)}
+  onSelectCity={(city: GlobeCity) => fetchWeather(city.name)}
+  onSearch={(query) => fetchWeather(query)}
+/>
+
     </div>
   );
 }
