@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { CloudSun, Droplets, Wind, Search, AlertTriangle, Sunrise, Sunset } from "lucide-react";
+import dynamic from "next/dynamic";
 
-import GlobeSheet from "@/components/globe/GlobeSheet";
+
+const GlobeSheet = dynamic(() => import("@/components/globe/GlobeSheet"), { ssr: false });
 import { GlobeCity } from "@/lib/globeCities";
 
 

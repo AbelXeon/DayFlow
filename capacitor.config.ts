@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: "public",
   server: {
 
-    url: "https://your-project-name.vercel.app",
+    url: "https://day-flow-pi-three.vercel.app",
     cleartext: false,
   },
 };

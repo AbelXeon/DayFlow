@@ -2,10 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { Menu } from "lucide-react";
+
+import dynamic from "next/dynamic";
 import CalcMenuSheet, { CalcMode } from "@/components/calculator/CalcMenuSheet";
-import UnitConverterView from "@/components/calculator/UnitConverterView";
-import ProgrammerView from "@/components/calculator/ProgrammerView";
-import ScientificView from "@/components/calculator/ScientificView";
+
+const ScientificView = dynamic(() => import("@/components/calculator/ScientificView"), { ssr: false });
+const ProgrammerView = dynamic(() => import("@/components/calculator/ProgrammerView"), { ssr: false });
+const UnitConverterView = dynamic(() => import("@/components/calculator/UnitConverterView"), { ssr: false });
+
 
 const unitModes = new Set([
   "length", "mass", "volume", "area", "speed", "time", "power", "energy", "data", "pressure", "angle", "temperature",
