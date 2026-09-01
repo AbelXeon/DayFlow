@@ -30,7 +30,6 @@ export default function WeatherPage() {
   const [data, setData] = useState<WeatherData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
 const [globeOpen, setGlobeOpen] = useState(false);
 
 
