@@ -23,8 +23,7 @@ math.import(
   { override: true }
 );
 
-// Numeric definite integral via Simpson's rule — no symbolic engine does this offline easily,
-// numeric approximation is the honest, reliable option here.
+
 export function simpsonIntegrate(expr: string, a: number, b: number, n = 1000): number {
   if (n % 2 !== 0) n++;
   const h = (b - a) / n;
@@ -43,7 +42,6 @@ export function simpsonIntegrate(expr: string, a: number, b: number, n = 1000): 
   return (h / 3) * sum;
 }
 
-// Numeric limit via approach from both sides — handles ±Infinity by substituting a large number
 export function numericLimit(expr: string, point: number | "Infinity" | "-Infinity"): string {
   const evalAt = (x: number) => {
     try {
