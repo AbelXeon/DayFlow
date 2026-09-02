@@ -157,7 +157,6 @@ export const unitCategories: Record<string, UnitCategory> = {
   },
 };
 
-// Temperature is affine, not linear — needs its own conversion, can't use a simple factor table
 export function convertTemperature(value: number, from: string, to: string): number {
   const toCelsius: Record<string, (v: number) => number> = {
     C: (v) => v,
