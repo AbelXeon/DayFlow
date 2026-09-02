@@ -1,7 +1,7 @@
 export type UnitCategory = {
   label: string;
   base: string;
-  units: Record<string, number>; // factor to base unit (linear categories only)
+  units: Record<string, number>; 
 };
 
 export const unitNames: Record<string, string> = {
