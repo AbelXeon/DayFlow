@@ -10,7 +10,6 @@ const ScientificView = dynamic(() => import("@/components/calculator/ScientificV
 const ProgrammerView = dynamic(() => import("@/components/calculator/ProgrammerView"), { ssr: false });
 const UnitConverterView = dynamic(() => import("@/components/calculator/UnitConverterView"), { ssr: false });
 
-
 const unitModes = new Set([
   "length", "mass", "volume", "area", "speed", "time", "power", "energy", "data", "pressure", "angle", "temperature",
 ]);

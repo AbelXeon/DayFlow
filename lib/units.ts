@@ -4,6 +4,101 @@ export type UnitCategory = {
   units: Record<string, number>; // factor to base unit (linear categories only)
 };
 
+export const unitNames: Record<string, string> = {
+  // Length
+  mm: "Millimeter (mm)",
+  cm: "Centimeter (cm)",
+  m: "Meter (m)",
+  km: "Kilometer (km)",
+  in: "Inch (in)",
+  ft: "Foot (ft)",
+  yd: "Yard (yd)",
+  mi: "Mile (mi)",
+
+  // Mass
+  mg: "Milligram (mg)",
+  g: "Gram (g)",
+  kg: "Kilogram (kg)",
+  t: "Metric Ton (t)",
+  oz: "Ounce (oz)",
+  lb: "Pound (lb)",
+
+  // Volume
+  ml: "Milliliter (mL)",
+  L: "Liter (L)",
+  "m³": "Cubic Meter (m³)",
+  gal: "US Gallon (gal)",
+  qt: "US Quart (qt)",
+  pt: "US Pint (pt)",
+  cup: "US Cup (cup)",
+  floz: "Fluid Ounce (fl oz)",
+
+  // Area
+  "mm²": "Square Millimeter (mm²)",
+  "cm²": "Square Centimeter (cm²)",
+  "m²": "Square Meter (m²)",
+  "km²": "Square Kilometer (km²)",
+  ha: "Hectare (ha)",
+  acre: "Acre (ac)",
+  "ft²": "Square Foot (ft²)",
+  "in²": "Square Inch (in²)",
+
+  // Speed
+  "m/s": "Meters per second (m/s)",
+  "km/h": "Kilometers per hour (km/h)",
+  mph: "Miles per hour (mph)",
+  knot: "Knot (kn)",
+  "ft/s": "Feet per second (ft/s)",
+
+  // Time
+  ms: "Millisecond (ms)",
+  s: "Second (s)",
+  min: "Minute (min)",
+  hr: "Hour (hr)",
+  day: "Day (d)",
+  week: "Week (wk)",
+
+  // Power
+  W: "Watt (W)",
+  kW: "Kilowatt (kW)",
+  MW: "Megawatt (MW)",
+  hp: "Horsepower (hp)",
+
+  // Energy
+  J: "Joule (J)",
+  kJ: "Kilojoule (kJ)",
+  cal: "Calorie (cal)",
+  kcal: "Kilocalorie (kcal)",
+  Wh: "Watt-hour (Wh)",
+  kWh: "Kilowatt-hour (kWh)",
+
+  // Data
+  bit: "Bit (b)",
+  byte: "Byte (B)",
+  KB: "Kilobyte (KB)",
+  MB: "Megabyte (MB)",
+  GB: "Gigabyte (GB)",
+  TB: "Terabyte (TB)",
+
+  // Pressure
+  Pa: "Pascal (Pa)",
+  kPa: "Kilopascal (kPa)",
+  bar: "Bar (bar)",
+  atm: "Standard Atmosphere (atm)",
+  psi: "Pounds per sq inch (psi)",
+  mmHg: "Millimeter of mercury (mmHg)",
+
+  // Angle
+  deg: "Degree (°)",
+  rad: "Radian (rad)",
+  grad: "Gradian (grad)",
+
+  // Temperature
+  C: "Celsius (°C)",
+  F: "Fahrenheit (°F)",
+  K: "Kelvin (K)",
+};
+
 export const unitCategories: Record<string, UnitCategory> = {
   length: {
     label: "Length",
